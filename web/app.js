@@ -105,6 +105,48 @@ async function getBeacon() {
   }
 }
 
+// ---------- Определение языка по региону IP ----------
+// RU-язычные страны (СНГ). Легко расширить/сузить.
+const RU_REGION = new Set(['RU', 'BY', 'KZ', 'KG', 'TJ', 'UZ', 'AM', 'AZ', 'TM', 'MD']);
+
+function withTimeout(promise, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return { signal: ctrl.signal, done: () => clearTimeout(timer) };
+}
+
+async function fetchCountry() {
+  // 1) ipwho.is — JSON, без ключа, CORS, HTTPS
+  try {
+    const t = withTimeout(null, 2500);
+    const r = await fetch('https://ipwho.is/', { signal: t.signal });
+    t.done();
+    const j = await r.json();
+    if (j && j.success !== false && j.country_code) return String(j.country_code).toUpperCase();
+  } catch (e) { /* пробуем запасной */ }
+  // 2) ipapi.co — отдаёт чистый 2-буквенный код
+  try {
+    const t = withTimeout(null, 2500);
+    const r = await fetch('https://ipapi.co/country/', { signal: t.signal });
+    t.done();
+    const code = (await r.text()).trim().toUpperCase();
+    if (/^[A-Z]{2}$/.test(code)) return code;
+  } catch (e) { /* сдаёмся */ }
+  return null;
+}
+
+// Возвращает 'ru' | 'en' по IP (с кэшем) или null, если определить не удалось.
+async function getGeoLang() {
+  const cached = localStorage.getItem('geoLang');
+  if (cached === 'ru' || cached === 'en') return cached;
+  const cc = await fetchCountry();
+  if (!cc) return null;
+  const lang = RU_REGION.has(cc) ? 'ru' : 'en';
+  localStorage.setItem('geoLang', lang);
+  localStorage.setItem('geoCountry', cc);
+  return lang;
+}
+
 // ---------- Хранилище коллекции ----------
 function loadCollection() {
   try { return JSON.parse(localStorage.getItem('collection') || '[]'); }
@@ -272,16 +314,25 @@ function applyLang() {
 function switchLang() {
   LANG = LANG === 'ru' ? 'en' : 'ru';
   localStorage.setItem('lang', LANG);
+  localStorage.setItem('langManual', '1'); // ручной выбор перебивает гео/браузер навсегда
   applyLang();
 }
 
 // ---------- Инициализация ----------
 async function init() {
-  // язык: сохранённый → из ссылки ?lang= → по языку браузера
+  // Приоритет языка: ручной выбор → ?lang= в ссылке → кэш гео-IP → язык браузера.
+  // Мгновенный выбор (без сети), чтобы не было мигания; IP уточняется асинхронно ниже.
   const params = new URLSearchParams(location.search);
   const urlLang = params.get('lang');
-  LANG = localStorage.getItem('lang')
-    || (urlLang === 'en' || urlLang === 'ru' ? urlLang : null)
+  const manual = localStorage.getItem('langManual') === '1';
+  const stored = localStorage.getItem('lang');
+  const geoCache = localStorage.getItem('geoLang');
+  const urlPick = urlLang === 'en' || urlLang === 'ru' ? urlLang : null;
+  const manualPick = manual && (stored === 'en' || stored === 'ru') ? stored : null;
+
+  LANG = manualPick
+    || urlPick
+    || (geoCache === 'en' || geoCache === 'ru' ? geoCache : null)
     || ((navigator.language || 'en').toLowerCase().startsWith('ru') ? 'ru' : 'en');
 
   els.langToggle.addEventListener('click', switchLang);
@@ -305,6 +356,17 @@ async function init() {
   }
 
   applyLang();          // повторно — теперь с загруженным BEACON и (возможно) превью-дропом
+
+  // Уточнение по региону IP — только если язык не выбран вручную, не задан ссылкой
+  // и ещё не кэширован. Переключаем, лишь если пользователь пока не трогал тумблер.
+  if (!manualPick && !urlPick && !geoCache) {
+    const geo = await getGeoLang();
+    const stillAuto = localStorage.getItem('langManual') !== '1';
+    if (geo && geo !== LANG && stillAuto) {
+      LANG = geo;
+      applyLang();
+    }
+  }
 }
 
 init();
