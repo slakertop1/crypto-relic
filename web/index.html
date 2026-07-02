@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crypto Relic Day</title>
-  <meta name="description" content="Once a day, the whole world opens one case sealed by a Bitcoin block hash. Your drop depends on your name. No rerolls." />
+  <title>Crypto Relic Day — daily provably-fair Bitcoin case opener</title>
+  <meta name="description" content="Once a day, the whole world opens one case sealed by a Bitcoin block hash. Your drop depends on your name. No rerolls, no server, provably fair. Free daily collectible game." />
+  <link rel="canonical" href="https://cryptorelicday.github.io/crypto-relic/" />
+  <link rel="alternate" hreflang="en" href="https://cryptorelicday.github.io/crypto-relic/?lang=en" />
+  <link rel="alternate" hreflang="ru" href="https://cryptorelicday.github.io/crypto-relic/?lang=ru" />
+  <link rel="alternate" hreflang="x-default" href="https://cryptorelicday.github.io/crypto-relic/" />
   <!-- OG / Twitter Card: краулеры не выполняют JS, поэтому статика на EN (целевая аудитория).
        Язык интерфейса для людей переключается в app.js. -->
   <meta property="og:title" content="Crypto Relic Day" />
@@ -69,6 +73,20 @@
     </footer>
   </main>
 
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Crypto Relic Day",
+    "url": "https://cryptorelicday.github.io/crypto-relic/",
+    "description": "Daily provably-fair collectible case opener sealed by a real Bitcoin block hash. One drop per name per day, no rerolls.",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web",
+    "inLanguage": ["en", "ru"],
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "image": "https://cryptorelicday.github.io/crypto-relic/og-image.png"
+  }
+  </script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
