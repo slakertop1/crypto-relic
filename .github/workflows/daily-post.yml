@@ -1,6 +1,6 @@
 # Ежедневный пост «дроп дня» в X от @CryptoRelicDay.
 # Режим задаётся repo-переменной POST_MODE:
-#   draft (по умолчанию) — создать Issue с готовым текстом (постишь руками);
+#   draft (по умолчанию) — прислать готовый текст в Telegram (постишь руками);
 #   live — опубликовать в X автоматически (нужны кредиты X API).
 name: daily-post
 on:
@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   post:
@@ -28,10 +27,22 @@ jobs:
           X_CONSUMER_SECRET: ${{ secrets.X_CONSUMER_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-      - name: Create draft issue
+      - name: Send draft to Telegram
         if: ${{ (vars.POST_MODE || 'draft') != 'live' }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: |
-          TITLE="📤 Пост дня — $(date -u +%F) (скопируй и запость в X)"
-          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file draft.txt
+          node -e '
+          const fs = require("fs");
+          const draft = fs.readFileSync("draft.txt", "utf8");
+          const text = "📤 Пост дня для X — скопируй и опубликуй:\n\n" + draft;
+          fetch("https://api.telegram.org/bot" + process.env.TG_BOT_TOKEN + "/sendMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: process.env.TG_CHAT_ID, text, disable_web_page_preview: true }),
+          }).then(r => r.json()).then(j => {
+            if (!j.ok) { console.error(JSON.stringify(j)); process.exit(1); }
+            console.log("draft sent to Telegram");
+          });
+          '
