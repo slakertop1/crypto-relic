@@ -1,0 +1,60 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#1b2540"/>
+      <stop offset="60%" stop-color="#0e1322"/>
+      <stop offset="100%" stop-color="#0b0e14"/>
+    </radialGradient>
+    <linearGradient id="gemTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd166"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="gemLeft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="gemRight" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="18" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="400" height="400" fill="url(#bg)"/>
+
+  <!-- мягкое свечение под гемом -->
+  <ellipse cx="200" cy="215" rx="120" ry="110" fill="#f59e0b" opacity="0.14"/>
+
+  <!-- гем: верхняя корона -->
+  <g filter="url(#glow)">
+    <!-- верхние фасеты -->
+    <polygon points="200,86 268,150 200,138 132,150" fill="url(#gemTop)"/>
+    <polygon points="132,150 200,138 200,150" fill="#fde68a" opacity="0.85"/>
+    <!-- левая грань -->
+    <polygon points="132,150 200,150 200,300" fill="url(#gemLeft)"/>
+    <!-- правая грань -->
+    <polygon points="268,150 200,150 200,300" fill="url(#gemRight)"/>
+    <!-- рёбра -->
+    <polyline points="132,150 200,300 268,150" fill="none" stroke="#1a1200" stroke-opacity="0.35" stroke-width="3"/>
+    <line x1="200" y1="138" x2="200" y2="300" stroke="#1a1200" stroke-opacity="0.25" stroke-width="3"/>
+    <!-- блик -->
+    <polygon points="176,120 200,98 216,118 192,132" fill="#ffffff" opacity="0.5"/>
+  </g>
+
+  <!-- тонкое внешнее кольцо-печать -->
+  <circle cx="200" cy="200" r="178" fill="none" stroke="#f59e0b" stroke-opacity="0.55" stroke-width="4"/>
+  <circle cx="200" cy="200" r="166" fill="none" stroke="#f59e0b" stroke-opacity="0.18" stroke-width="1.5"/>
+
+  <!-- метки блоков на кольце (как деления печати) -->
+  <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round" opacity="0.8">
+    <line x1="200" y1="16" x2="200" y2="34"/>
+    <line x1="200" y1="366" x2="200" y2="384"/>
+    <line x1="16"  y1="200" x2="34"  y2="200"/>
+    <line x1="366" y1="200" x2="384" y2="200"/>
+  </g>
+</svg>
