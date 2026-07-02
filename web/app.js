@@ -1,4 +1,4 @@
-import { rollDrop, dropLine, relicName, rarityLabelOf } from './engine.mjs';
+import { rollDrop, dropLine, relicName, rarityLabelOf, shortHash } from './engine.mjs';
 
 // ---------- Вспомогательное ----------
 const $ = (id) => document.getElementById(id);
@@ -295,7 +295,7 @@ function applyLang() {
   // маяк
   if (BEACON) {
     els.beacon.innerHTML = BEACON.height > 0
-      ? L.beaconLine(BEACON.height, BEACON.hash.slice(0, 10))
+      ? L.beaconLine(BEACON.height, shortHash(BEACON.hash))
       : L.beaconOffline(todayUTC());
   } else {
     els.beacon.textContent = L.beaconLoading;

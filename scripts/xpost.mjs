@@ -6,6 +6,7 @@
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { shortHash } from '../web/engine.mjs';
 
 const MODE = process.env.POST_MODE === 'live' ? 'live' : 'draft';
 
@@ -71,7 +72,7 @@ const beacon = await getBeacon();
 const text = [
   `⛓️ Day ${dayNumber()}. Block #${beacon.height} is sealed.`,
   '',
-  `${beacon.hash.slice(0, 10)}…`,
+  `${shortHash(beacon.hash)}…`,
   '',
   "Today's relic pool is live. One drop per name. Gone at midnight UTC.",
   '',

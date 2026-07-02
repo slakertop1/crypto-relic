@@ -86,6 +86,15 @@ function normLang(lang) {
   return lang === 'en' ? 'en' : 'ru';
 }
 
+// Короткая читаемая форма хеша блока: ведущие нули PoW схлопываются в «00…»,
+// дальше значащие символы. '00000000000000000001a3f4…' -> '00…1a3f4c2e'
+export function shortHash(hash) {
+  const h = String(hash);
+  const sig = h.replace(/^0+/, '');
+  if (sig === h) return h.slice(0, 8); // нулей в начале нет (оффлайн-маяк и т.п.)
+  return '00…' + sig.slice(0, 8);
+}
+
 // ---------- Локализация по индексам (для перерисовки коллекции при смене языка) ----------
 
 export function relicName(adjIndex, nounIndex, lang) {
@@ -170,7 +179,7 @@ export function rollDrop(beacon, username, dateStr, lang) {
     serial,
     beaconHeight: beacon.height,
     beaconHash: beacon.hash,
-    beaconShort: String(beacon.hash).slice(0, 8),
+    beaconShort: shortHash(beacon.hash),
   };
 }
 
