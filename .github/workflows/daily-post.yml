@@ -1,0 +1,24 @@
+# Ежедневный автопост «дроп дня» в X от @CryptoRelicDay
+name: daily-post
+on:
+  schedule:
+    - cron: '0 15 * * *'   # 15:00 UTC ежедневно
+  workflow_dispatch:        # ручной запуск для теста
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/xpost.mjs
+        env:
+          X_CONSUMER_KEY: ${{ secrets.X_CONSUMER_KEY }}
+          X_CONSUMER_SECRET: ${{ secrets.X_CONSUMER_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
