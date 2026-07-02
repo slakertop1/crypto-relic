@@ -67,6 +67,7 @@ body {
   background: var(--panel);
   padding: 8px 12px;
   min-width: 150px;
+  box-shadow: 0 0 16px -8px var(--fglow, transparent);
 }
 .feed-cell .fu {
   font-size: 12px;
@@ -137,6 +138,36 @@ body {
 
 .hint { text-align: center; color: var(--muted); font-size: 12.5px; min-height: 16px; margin: 10px 0 0; }
 
+/* ---------- Ритуал вскрытия печати ---------- */
+.seal-stage {
+  width: 100%;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--bg2), #0d1220);
+  border: 1px solid var(--line);
+}
+.seal-hex {
+  width: 110px;
+  height: 110px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 12px #f59e0b66);
+  animation: seal-charge 1.5s cubic-bezier(.5,0,.8,.4) forwards;
+}
+@keyframes seal-charge {
+  0%   { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 8px #f59e0b44); }
+  55%  { transform: scale(1.06) rotate(-2deg); }
+  75%  { transform: scale(1.14) rotate(2deg); filter: drop-shadow(0 0 26px #f59e0baa); }
+  92%  { transform: scale(1.22) rotate(-1deg); }
+  100% { transform: scale(1.28); filter: drop-shadow(0 0 40px #f59e0b); }
+}
+.seal-stage.burst .seal-hex { animation: seal-burst .28s ease-out forwards; }
+@keyframes seal-burst {
+  to { transform: scale(2.2); opacity: 0; filter: drop-shadow(0 0 60px #f59e0b); }
+}
+
 /* ---------- Карточка ---------- */
 .card-host { margin-bottom: 16px; display: flex; justify-content: center; }
 .relic {
@@ -153,6 +184,47 @@ body {
 @keyframes reveal {
   from { opacity: 0; transform: translateY(10px) scale(.98); }
   to   { opacity: 1; transform: none; }
+}
+
+/* усиленное появление после ритуала */
+.relic.hot { animation: reveal-hot .55s cubic-bezier(.2,.9,.25,1.2); }
+@keyframes reveal-hot {
+  0%   { opacity: 0; transform: scale(.82); }
+  60%  { opacity: 1; transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.relic.blaze { box-shadow: 0 0 0 1px var(--rar), 0 0 60px -12px var(--rar), 0 18px 50px -20px var(--glow); }
+
+/* искры для legendary/mythic: разлетаются из центра карточки */
+.spark {
+  position: absolute;
+  left: 50%; top: 45%;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--rar);
+  pointer-events: none;
+  opacity: 0;
+  animation: spark-fly .9s ease-out forwards;
+  animation-delay: var(--dl, 0s);
+}
+@keyframes spark-fly {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.3); }
+}
+
+/* лёгкая тряска для mythic */
+.card-host.shake { animation: shake .4s ease-in-out; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-hex, .relic, .relic.hot, .card-host.shake, .spark { animation: none !important; }
+  .spark { display: none; }
 }
 .relic::before {
   content: "";

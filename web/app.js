@@ -52,6 +52,7 @@ const I18N = {
     hintLoading: 'Ещё гружу блок, секунду…',
     hintAlready: 'Сегодня этот ник уже открывал. Вот твоя реликвия дня.',
     hintCopyFail: 'Не удалось скопировать — скопируй ссылку из адресной строки.',
+    hintOpening: 'Ломаю печать…',
     shareText: (line) => `Моя крипто-реликвия дня: ${line}.\nПроверь, что выпадет твоему нику 👇`,
     toggleLabel: 'EN',
     feedTitle: 'Последние дропы',
@@ -83,6 +84,7 @@ const I18N = {
     hintLoading: 'Still loading the block, one sec…',
     hintAlready: 'This name already opened today. Here’s your relic of the day.',
     hintCopyFail: 'Couldn’t copy — grab the link from the address bar.',
+    hintOpening: 'Breaking the seal…',
     shareText: (line) => `My crypto relic of the day: ${line}.\nCheck what today’s block gives you 👇`,
     toggleLabel: 'RU',
     feedTitle: 'Latest drops',
@@ -253,6 +255,7 @@ function renderFeed() {
     const cell = document.createElement('div');
     cell.className = 'feed-cell';
     cell.style.setProperty('--fc', rarityColorOf(e.r));
+    if (e.r === 'legendary' || e.r === 'mythic') cell.style.setProperty('--fglow', rarityColorOf(e.r));
     const u = document.createElement('div'); u.className = 'fu'; u.textContent = e.u;
     const n = document.createElement('div'); n.className = 'fn'; n.textContent = relicName(e.a, e.n, LANG);
     const ti = document.createElement('div'); ti.className = 'ft';
@@ -280,6 +283,59 @@ function reportOpen(drop) {
   }).then(() => loadFeed()).catch(() => {});
 }
 
+// ---------- Ритуал вскрытия ----------
+const SEAL_SVG = `
+  <svg class="seal-hex" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <polygon points="32,7 53,19.5 53,44.5 32,57 11,44.5 11,19.5"
+             fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+    <polygon points="32,19 45,32 32,45 19,32" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="32" cy="32" r="4" fill="currentColor"/>
+  </svg>`;
+
+function applyRevealEffects(drop) {
+  const relic = els.cardHost.querySelector('.relic');
+  if (!relic) return;
+  const tier = drop.rarity.key;
+  relic.classList.add('hot');
+  if (['rare', 'epic', 'legendary', 'mythic'].includes(tier)) relic.classList.add('blaze');
+  if (['legendary', 'mythic'].includes(tier)) {
+    for (let i = 0; i < 16; i++) {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 90 + Math.random() * 120;
+      s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      s.style.setProperty('--dl', (Math.random() * 0.15) + 's');
+      relic.append(s);
+    }
+  }
+  if (tier === 'mythic') {
+    els.cardHost.classList.add('shake');
+    setTimeout(() => els.cardHost.classList.remove('shake'), 500);
+  }
+}
+
+function playReveal(drop) {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) { renderCard(drop); return; }
+
+  els.openBtn.disabled = true;
+  els.shareRow.hidden = true;
+  els.cardHost.hidden = false;
+  els.cardHost.innerHTML = `<div class="seal-stage">${SEAL_SVG}</div>`;
+  els.hint.textContent = t().hintOpening;
+
+  setTimeout(() => {
+    els.cardHost.querySelector('.seal-stage')?.classList.add('burst');
+    setTimeout(() => {
+      renderCard(drop);
+      applyRevealEffects(drop);
+      els.openBtn.disabled = false;
+    }, 260);
+  }, 1500);
+}
+
 // ---------- Открытие ----------
 function alreadyOpenedToday(username) {
   return loadCollection().some((c) => c.date === todayUTC() && c.username === username.trim().toLowerCase());
@@ -302,12 +358,12 @@ function doOpen() {
 
   saveToCollection(drop);
   updateStreak(date);
-  renderCard(drop);
   renderCollection();
   renderStreak();
   els.uname.value = uname;
   localStorage.setItem('lastUser', uname);
   reportOpen(drop);
+  playReveal(drop);
 }
 
 // ---------- Шеринг ----------
