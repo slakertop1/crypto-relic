@@ -353,6 +353,7 @@ function doOpen() {
   if (alreadyOpenedToday(uname)) {
     renderCard(drop);
     els.hint.textContent = t().hintAlready;
+    reportOpen(drop); // воркер мог не знать дроп (открыт до фичи/офлайн) — дошлём, дубли он отсеет
     return;
   }
 
@@ -370,7 +371,10 @@ function doOpen() {
 function shareUrl(username) {
   // Ссылка ведёт через воркер: краулерам он отдаёт персональное превью дропа
   // (карточка редкости + название предмета), людей мгновенно редиректит на сайт.
-  return `${FEED_URL}/s/${encodeURIComponent(username)}?d=${todayUTC().replace(/-/g, '')}&lang=${LANG}`;
+  // r= — антикэш: каждая кнопка «поделиться» даёт свежий URL, чтобы X не подсунул
+  // ранее закэшированную карточку (например, фолбэк до того, как дроп дошёл до воркера).
+  const r = Date.now().toString(36).slice(-4);
+  return `${FEED_URL}/s/${encodeURIComponent(username)}?d=${todayUTC().replace(/-/g, '')}&lang=${LANG}&r=${r}`;
 }
 function shareToX() {
   if (!currentDrop) return;
