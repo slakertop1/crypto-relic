@@ -26,32 +26,3 @@ crypto-relic/
 └── README.md
 ```
 
-## Веб: запуск локально
-
-Нужен любой статический сервер (из-за ES-модулей нельзя открывать файл напрямую):
-
-```bash
-cd web
-npx serve .            # или: python -m http.server 3000
-```
-
-Открой `http://localhost:3000`.
-
-### Деплой (бесплатно, навсегда)
-- **GitHub Pages**: залей содержимое `web/` в репозиторий, включи Pages.
-- **Cloudflare Pages** / **Netlify** / **Vercel**: укажи `web/` как корень, build-команды не нужны.
-
-## Telegram-бот: запуск
-
-```bash
-cd bot
-npm install
-BOT_TOKEN=<токен от @BotFather> npm start
-```
-
-Команды: `/open`, `/collection`, `/streak`, `/odds`.
-В Telegram сценарий «напиши боту → получи дроп» **бесплатен и без лимитов на чтение** (в отличие от X API).
-
-### Деплой бота бесплатно
-- Простейше: **Railway** / **Render** free-инстанс (polling, как сейчас).
-- Правильно и «спит бесплатно»: **Cloudflare Workers** через webhook, состояние в **Workers KV** вместо `store.json`.
